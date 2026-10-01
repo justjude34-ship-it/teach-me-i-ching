@@ -7,11 +7,12 @@
 <style>body{margin:0;background:#000000;color:#f5f0e8;font:16px system-ui;display:grid;place-items:center;min-height:100dvh;text-align:center;padding:24px}</style>
 </head><body>
 <p id="s">Loading Teach Me the I Ching…</p>
-<p style="opacity:.6;font-size:.8rem;max-width:28rem">If this stays blank on <code>file://</code>, open the single-file copy from local artifacts / Gumroad zip (<code>Teach-Me-the-I-Ching.html</code> self-contained).</p>
+<p style="opacity:.6;font-size:.8rem;max-width:28rem">If this stays blank on <code>file://</code>, open the single-file copy (<code>Teach-Me-the-I-Ching.full.html</code>) or the Gumroad zip.</p>
 <script>
 (async () => {
   try {
-    const parts = await Promise.all([0,1,2,3,4].map(i => fetch("parts/b64-" + i + ".txt").then(r => {
+    const n = 12;
+    const parts = await Promise.all([...Array(n).keys()].map(i => fetch("parts/b64-" + i + ".txt").then(r => {
       if (!r.ok) throw new Error("missing parts/b64-" + i + ".txt");
       return r.text();
     })));
@@ -21,7 +22,7 @@
     const html = await new Response(stream).text();
     document.open(); document.write(html); document.close();
   } catch (e) {
-    document.getElementById("s").innerHTML = "Could not load app parts.<br><small>" + e + "</small><br><br>Use the single-file HTML from local artifacts for offline / Gumroad.";
+    document.getElementById("s").innerHTML = "Could not load app parts.<br><small>" + e + "</small><br><br>Use the single-file HTML for offline / Gumroad.";
   }
 })();
 </script>
