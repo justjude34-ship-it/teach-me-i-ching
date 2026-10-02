@@ -1,0 +1,4 @@
+# No build. Publish the repo root, which contains index.html.
+[build]
+  publish = "."
+  command = ""
