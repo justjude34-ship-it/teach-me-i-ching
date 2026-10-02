@@ -13,9 +13,9 @@ jobs:
           import base64, shutil
           from pathlib import Path
           root = Path('.hero-chunks')
-          pre = base64.b64decode((root/'pre.b64').read_text())
-          b64 = ''.join((root/f'c{i:02d}.txt').read_text() for i in range(32)).encode()
-          sufb = ''.join((root/f's{i:02d}.txt').read_text() for i in range(8))
+          pre = base64.b64decode((root/'pre.b64').read_text().strip())
+          b64 = ''.join((root/f'c{i:02d}.txt').read_text().strip() for i in range(32)).encode()
+          sufb = ''.join((root/f's{i:02d}.txt').read_text().strip() for i in range(8))
           suf = base64.b64decode(sufb)
           Path('index.html').write_bytes(pre + b64 + suf)
           shutil.rmtree(root)
