@@ -13,10 +13,12 @@ jobs:
           from pathlib import Path
           p = Path('index.html')
           b = p.read_bytes()
-          ctx = b[32640:32670]
-          assert ctx == b'vn6TKK5B/KBnYHAnth3BxMqtX+Ln', ctx
+          assert b[32640:32655] == b'vn6TKK5B/KBnYHA', b[32640:32670]
           assert b[32655:32656] == b'n'
-          p.write_bytes(b[:32655] + b[32656:])
+          assert b[32656:32670] == b'th3BxMqtX+Lnzi'
+          fixed = b[:32655] + b[32656:]
+          assert len(fixed) == 90915
+          p.write_bytes(fixed)
           Path('.github/workflows/fix-hero-byte.yml').unlink()
           PY
       - name: Commit and push
@@ -24,5 +26,5 @@ jobs:
           git config user.name "justjude34-ship-it"
           git config user.email "justjude34@gmail.com"
           git add -A
-          git commit -m "Add gold yin-yang hero banner"
+          git commit -m "Remove extra byte in hero image data"
           git push
