@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#1c1917"/>
+<title>Teach Me the I Ching</title>
+<style>
+:root{--bg:#1c1917;--card:#292524;--text:#f5f0e8;--muted:#a8a29e;--gold:#d4a574;--sage:#8fbc8f;--line:#f5f0e8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:18px/1.45 system-ui,sans-serif}
+header,main{max-width:640px;margin:0 auto;padding:16px}
+header{padding-bottom:0}
+h1{font-size:1.6rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 12px}
+nav{display:flex;gap:8px;position:sticky;top:0;background:var(--bg);padding:8px 0 12px;z-index:2}
+button,select{font:inherit;color:var(--text);background:var(--card);border:1px solid #44403c;border-radius:12px;min-height:44px;padding:8px 14px}
+nav button.active,button.primary{background:var(--gold);color:#1c1917;border-color:var(--gold);font-weight:650}
+.card{background:var(--card);border-radius:16px;padding:16px;margin:0 0 12px}
+h2{font-size:1.25rem;margin:0 0 8px}
+.muted{color:var(--muted)}
+.tri{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tri div{background:#1c1917;border-radius:12px;padding:10px}
+.bars{display:flex;flex-direction:column-reverse;gap:6px;align-items:center;margin:12px 0}
+.bar{height:10px;width:140px;background:var(--line);border-radius:3px}
+.bar.yin{background:transparent;display:flex;justify-content:space-between}
+.bar.yin i{display:block;width:62px;height:10px;background:var(--line);border-radius:3px}
+.bar.chg{outline:2px solid var(--gold);outline-offset:3px}
+.row{display:flex;gap:8px;align-items:center;margin:6px 0}
+.grow{flex:1}
+.coins{display:flex;gap:8px;justify-content:center;margin:8px 0}
+.coin{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-weight:700}
+.coin.h{background:var(--sage);color:#1c1917}
+.coin.t{background:#44403c}
+ol{padding-left:1.2rem}
+li{margin:6px 0}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header>
+<h1>Teach Me the I Ching</h1>
+<p class="sub">A short path. One idea at a time.</p>
+<nav>
+<button class="active" data-tab="learn">Learn</button>
+<button data-tab="cast">Cast</button>
+<button data-tab="book">64</button>
+</nav>
+</header>
+<main>
+<section id="learn">
+<div class="card" id="lesson"></div>
+<button class="primary" id="next">Next</button>
+</section>
+<section id="cast" class="hide">
+<div class="card">
+<h2>Three coins</h2>
+<p>Ask one clear question. Throw three coins, six times. The first throw is the bottom line.</p>
+<p class="muted">Heads = 3, tails = 2. Total 6 changing yin, 7 stable yang, 8 stable yin, 9 changing yang.</p>
+<div class="coins" id="coins"></div>
+<p id="thrown">Throw 1 of 6 — bottom line</p>
+<button class="primary" id="throw">Throw</button>
+<button id="reset">Start over</button>
+<div id="reading"></div>
+</div>
+</section>
+<section id="book" class="hide">
+<div class="card">
+<h2>The 64</h2>
+<label class="muted" for="pick">Pick a number</label>
+<select id="pick" class="grow"></select>
+<div id="entry"></div>
+</div>
+</section>
+</main>
+<script>
+const lessons=[
+["What it is","The I Ching, the Book of Changes, is an old Chinese book of situations. It does not tell you what will happen. It gives a picture of the moment and a way to meet it. A reading is six lines. You read the picture, then only the lines that are changing."],
+["Yin and yang","A solid line is yang: active, firm, outward. A broken line is yin: open, receptive, inward. Neither is better. Change happens when they stack."],
+["Eight trigrams","Three lines make a trigram. Eight of them name the basic pictures: Heaven, Earth, Thunder, Wind, Water, Fire, Mountain, Lake. A hexagram is two trigrams, lower then upper."],
+["Six lines","Six lines, bottom first, make a hexagram. There are 64. The lower three lines are the inner picture. The upper three are the outer picture."],
+["How to cast","Use three coins. Heads counts 3, tails counts 2. Add them. 6 is a changing yin line. 7 is a stable yang line. 8 is a stable yin line. 9 is a changing yang line. Throw six times, bottom line first."],
+["How to read","Read the name and the short picture first. If a line is 6 or 9, it is changing: read that line, then flip it. Flipping the changing lines makes a second hexagram, the direction things are moving. Stable lines stay as they are."],
+["Practice","Ask one question you can act on. Cast. Read the first picture, then only the changing lines, then the second picture. Write one sentence: what this asks of me today."]
+];
+const trigrams=[
+["Qian","Heaven","Creative, firm"],["Kun","Earth","Receptive, holding"],["Zhen","Thunder","Movement, shock"],["Xun","Wind","Gentle, entering"],["Kan","Water","Depth, risk"],["Li","Fire","Clarity, clinging"],["Gen","Mountain","Still, stopping"],["Dui","Lake","Open, joyful"]
+];
+const hex=[
+["Qian","Creative","Keep going with a clear effort."],["Kun","Receptive","Support the work. Do not force the lead."],["Zhun","Difficulty at the start","It is messy. Gather help and start small."],["Meng","Youthful folly","You are still learning. Ask, then listen."],["Xu","Waiting","The time is not ripe. Nourish yourself and wait."],["Song","Conflict","A dispute is here. Seek fair terms, not a win."],["Shi","The army","Order and a steady lead matter now."],["Bi","Holding together","Join with people you trust."],["Xiao Chu","Small taming","A small restraint shapes a larger force."],["Lu","Treading","Watch your step. Conduct matters more than speed."],["Tai","Peace","Heaven and earth meet. Use the ease while it lasts."],["Pi","Standstill","The way is blocked. Do not push a closed door."],["Tong Ren","Fellowship","Work with others who share the aim."],["Da You","Great possession","You have much. Share it and stay modest."],["Qian","Modesty","Lower yourself a little. It makes room."],["Yu","Enthusiasm","Energy is up. Point it at one real task."],["Sui","Following","Follow what is sound, not what is loud."],["Gu","Repair","Something has spoiled. Clean the root of it."],["Lin","Approach","A chance is nearing. Meet it prepared."],["Guan","Contemplation","Look before you act. See the whole."],["Shi He","Biting through","A hard knot. Cut through it cleanly."],["Bi","Grace","Beauty helps, but do not hide behind it."],["Bo","Splitting apart","Support is thinning. Do not add weight."],["Fu","Return","A turn back toward the start. Begin again."],["Wu Wang","Innocence","Act simply. Do not scheme."],["Da Chu","Great taming","Hold a strong force with care."],["Yi","Nourishment","Watch what you take in, and what you say."],["Da Guo","Great excess","The load is too heavy. Shore it up."],["Kan","The abyss","Danger repeats. Move through, do not freeze."],["Li","The clinging","Stay with what gives light."],["Xian","Influence","A quiet pull between two sides."],["Heng","Duration","Keep a steady pace you can hold."],["Dun","Retreat","Step back on purpose. It is not defeat."],["Da Zhuang","Great power","Strength is high. Do not misuse it."],["Jin","Progress","Advance in the open, a step at a time."],["Ming Yi","Darkening","Light is hidden. Protect it."],["Jia Ren","The family","Set the tone at home first."],["Kui","Opposition","Difference is real. Do not pretend it away."],["Jian","Obstruction","The path is blocked. Find another way around."],["Xie","Release","The knot loosens. Do not re-tie it."],["Sun","Decrease","Give a little up. The loss can clarify."],["Yi","Increase","Help arrives. Use it on what matters."],["Guai","Breakthrough","Speak the hard thing plainly, then stop."],["Gou","Coming to meet","An encounter. Notice it before it grows."],["Cui","Gathering","People collect. Give them a clear center."],["Sheng","Pushing upward","Grow by small pushes, not a leap."],["Kun","Oppression","You feel stuck. Keep one small duty."],["Jing","The well","The source is there. Do not neglect it."],["Ge","Revolution","The old form no longer fits. Change it."],["Ding","The cauldron","Cook what you have into something useful."],["Zhen","Thunder","A shock. After it, set things back in order."],["Gen","Keeping still","Stop. Stillness is the move."],["Jian","Gradual progress","Slow steps. Like a tree, not a spark."],["Gui Mei","The marrying maiden","Know your place in the bond. Do not rush rank."],["Feng","Abundance","Fullness. Share it before it peaks."],["Lu","The wanderer","You are passing through. Travel light."],["Xun","The gentle","Enter softly and repeat. Wind shapes stone."],["Dui","The joyous","Openness helps. Do not be careless with it."],["Huan","Dispersion","Scatter what is stuck. Then gather again."],["Jie","Limitation","A boundary protects. Set one you can keep."],["Zhong Fu","Inner truth","Trust the quiet center, then speak."],["Xiao Guo","Small excess","Mind the small things. Do not overreach."],["Ji Ji","After completion","It is in order. Stay careful so it holds."],["Wei Ji","Before completion","Nearly there. Finish with care."]
+];
+const lines=[
+"111111","000000","100010","010001","111010","010111","010000","000010","111011","110111","111000","000111","101111","111101","001000","000100","100110","011001","110000","000011","100101","101001","000001","100000","100111","111001","100001","011110","010010","101101","001110","011100","001111","111100","000101","101000","101011","110101","001010","010100","110001","100011","111110","011111","000110","011000","010110","011010","101110","011101","100100","001001","001011","110100","101100","001101","011011","110110","010011","110010","110011","001100","101010","010101"
+];
+let casts=[], lessonAt=0;
+const $=(s)=>document.querySelector(s);
+function bars(bits, ch){
+ return "<div class='bars'>"+[...bits].map((b,i)=>{
+  const c=ch&&ch[i]?" chg":"";
+  return b==="1"?"<div class='bar"+c+"'></div>":"<div class='bar yin"+c+"'><i></i><i></i></div>";
+ }).join("")+"</div>";
+}
+function showLesson(){
+ const [t,b]=lessons[lessonAt];
+ let extra="";
+ if(lessonAt===2) extra="<div class='tri'>"+trigrams.map(t=>"<div><strong>"+t[0]+"</strong><br>"+t[1]+"<br><span class='muted'>"+t[2]+"</span></div>").join("")+"</div>";
+ if(lessonAt===3) extra=bars("101010")+"<p class='muted'>Example: solid, broken, solid, broken, solid, broken. Bottom line is the first one you cast.</p>";
+ $("#lesson").innerHTML="<p class='muted'>Lesson "+(lessonAt+1)+" of 7</p><h2>"+t+"</h2><p>"+b+"</p>"+extra;
+ $("#next").textContent=lessonAt===6?"Start again":"Next";
+}
+function tab(name){
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
+ ["learn","cast","book"].forEach(id=>$("#"+id).classList.toggle("hide", id!==name));
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+$("#next").onclick=()=>{ lessonAt=(lessonAt+1)%7; showLesson(); };
+function coin(){ return Math.random()<0.5?3:2; }
+function drawCoins(vals){
+ $("#coins").innerHTML=vals.map(v=>"<div class='coin "+(v===3?"h":"t")+"'>"+(v===3?"H":"T")+"</div>").join("");
+}
+function renderReading(){
+ if(casts.length<6){ $("#reading").innerHTML=""; return; }
+ const bits=casts.map(c=> (c===7||c===9)?"1":"0").join("");
+ const ch=casts.map(c=>c===6||c===9);
+ const idx=lines.indexOf(bits);
+ const rel=bits.split("").map((b,i)=>ch[i]?(b==="1"?"0":"1"):b).join("");
+ const idx2=lines.indexOf(rel);
+ const h=idx>=0?hex[idx]:null, h2=idx2>=0?hex[idx2]:null;
+ let html="<h2>"+(h?(idx+1)+". "+h[0]+" — "+h[1]:"Unknown figure")+"</h2>"+bars(bits,ch);
+ html+="<p>"+(h?h[2]:"")+"</p><ol>"+casts.map((c,i)=>"<li>Line "+(i+1)+": "+c+(c===6||c===9?" changing":" stable")+"</li>").join("")+"</ol>";
+ if(ch.some(Boolean)&&h2) html+="<h2>Moving toward "+(idx2+1)+". "+h2[0]+" — "+h2[1]+"</h2>"+bars(rel)+"<p>"+h2[2]+"</p>";
+ else if(!ch.some(Boolean)) html+="<p class='muted'>No changing lines. Read this picture only.</p>";
+ $("#reading").innerHTML=html;
+}
+$("#throw").onclick=()=>{
+ if(casts.length>=6) return;
+ const vals=[coin(),coin(),coin()];
+ drawCoins(vals);
+ casts.push(vals.reduce((a,b)=>a+b,0));
+ $("#thrown").textContent=casts.length<6?("Throw "+(casts.length+1)+" of 6"):"Done";
+ renderReading();
+};
+$("#reset").onclick=()=>{ casts=[]; $("#coins").innerHTML=""; $("#thrown").textContent="Throw 1 of 6 — bottom line"; $("#reading").innerHTML=""; };
+const pick=$("#pick");
+hex.forEach((h,i)=>{ const o=document.createElement("option"); o.value=i; o.textContent=(i+1)+". "+h[0]+" — "+h[1]; pick.appendChild(o); });
+function showEntry(){ const i=+pick.value; const h=hex[i]; $("#entry").innerHTML=bars(lines[i])+"<p><strong>"+h[0]+"</strong> — "+h[1]+"</p><p>"+h[2]+"</p><p class='muted'>Lines, bottom to top: "+lines[i].replace(/1/g,"solid ").replace(/0/g,"broken ")+"</p>"; }
+pick.onchange=showEntry;
+showLesson(); showEntry();
+</script>
+</body>
+</html>
